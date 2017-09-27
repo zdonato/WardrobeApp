@@ -18,11 +18,14 @@
   },
   "homepage": "https://github.com/zdonato/WardrobeApp#readme",
   "dependencies": {
+    "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",
+    "crypto": "^1.0.1",
     "express": "^4.15.5",
     "helmet": "^3.8.2",
     "jquery": "^3.2.1",
+    "lodash": "^4.17.4",
     "mysql": "^2.14.1",
     "timestamp-util": "^1.0.3"
   }
