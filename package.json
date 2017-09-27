@@ -1,0 +1,29 @@
+{
+  "name": "wardrobeapp",
+  "version": "0.0.1",
+  "description": "Senior Design Wardrobe App",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zdonato/WardrobeApp.git"
+  },
+  "author": "Zachary Donato <zdonato@stevens.edu>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zdonato/WardrobeApp/issues"
+  },
+  "homepage": "https://github.com/zdonato/WardrobeApp#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.15.5",
+    "helmet": "^3.8.2",
+    "jquery": "^3.2.1",
+    "mysql": "^2.14.1",
+    "timestamp-util": "^1.0.3"
+  }
+}
