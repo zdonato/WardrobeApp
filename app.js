@@ -38,3 +38,15 @@ const server = http.createServer(app);
 server.listen(PORT);
 
 timestamp(`Server listening on port ${PORT}...`);
+
+let DBHelper = require('./server/utilities/DBHelper');
+
+let helper = new DBHelper();
+
+helper.getUserByEmail('zacharyadonato@gmail.com')
+    .then( (res) => {
+        console.log(res);
+    })
+    .catch( (err) => {
+        console.log(err);
+    });

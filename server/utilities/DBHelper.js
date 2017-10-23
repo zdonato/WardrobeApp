@@ -66,7 +66,7 @@ class DBHelper {
                     })
                     .catch( (err) => {
                         // No user exists, create the new account.
-                        let sql = 'INSERT INTO `Accounts` (FirstName`, `LastName`, `email`, `password`, dob`) VALUES (?, ?, ?, ?, ?)';
+                        let sql = 'INSERT INTO `Accounts` (`firstName`, `lastName`, `email`, `password`, `dob`) VALUES (?, ?, ?, ?, ?)';
 
                         bcrypt.hash(password, SALT_ROUNDS, (err, hash) => {
                             if (err) {
@@ -104,7 +104,7 @@ class DBHelper {
      */
     getUserByEmail(email) {
         return new Promise( (resolve, reject) => {
-            const sql = 'SELECT UserId, email, FirstName, LastName, dob FROM Accounts WHERE email = ?';
+            const sql = 'SELECT UserId, email, firstName, lastName, dob FROM Accounts WHERE email = ?';
             ts(`[DBHelper.getUserByEmail] getting user ${email}`);
             
             this._pool.getConnection( (err, connection) => {
@@ -126,12 +126,11 @@ class DBHelper {
                     }
 
                     if (_.isEmpty(result)) {
-                        logError('DBHelper.getUserByEmail', 'No user exists with this email');
                         reject(ERRORS.NO_USER_FOUND);
                         return;
                     }
 
-                    resolve(result);
+                    resolve(result[0]);
                 });
             });
         });
@@ -144,4 +143,4 @@ function logError(fnName, msg, error) {
     if (error) console.log(error);
 }
 
-export DBHelper;
+module.exports = DBHelper;
