@@ -44,7 +44,7 @@ class DBHelper {
             // Check for undefined required vars.
             if (_.isUndefined(email) || _.isUndefined(password)) {
                 logError('DBHelper.createUser', 'Email and password must be defined', undefined);
-                reject(ERRORS.UNDEFINED_VAL_USER);
+                reject(ERRORS.UNDEFINED_VAL_USER('Email and password'));
                 return;
             }
 
@@ -57,10 +57,10 @@ class DBHelper {
                 }
 
                 // First check if the user with this email already exists.
-                this.getUserByEmail(email)
+                this.getUserByKey('email', email, ['email'])
                     .then( (result) => {
                         // User was found, reject the attempt to create a new one.
-                        logError('DBHelper.createUser this.getUserByEmail', `User already exists with email ${email}`);
+                        logError('DBHelper.createUser this.getUserByKey', `User already exists with email ${email}`);
                         reject(ERRORS.USER_TAKEN);
                         return;
                     })
@@ -86,7 +86,7 @@ class DBHelper {
                                 }
 
                                 // User created successfully. Return the user object.
-                                this.getUserByEmail(email)
+                                this.getUserByKey('email', email, ['userId', 'email', 'firstName', 'lastName', 'dob'])
                                     .then( (result) => { resolve(result); })
                                     .catch( (err) => { reject(err); });
                             });
@@ -97,35 +97,51 @@ class DBHelper {
     }
 
     /**
-     * Method to retrieve a user's information by email.
-     * @param email {String} - The user's email
+     * Method to retrieve a user's information by a key.
+     * @param k {String} - The key (column) to retrieve the user by
+     * @param v {String|Number} - The value to match the key to 
+     * @param cols {Array.String} - The columns to return from the query
      * 
-     * @return Returns a promise that resolves with the a user object
+     * @return Returns a promise that resolves with the user object
      */
-    getUserByEmail(email) {
+    getUserByKey(k, v, cols) {
         return new Promise( (resolve, reject) => {
-            const sql = 'SELECT UserId, email, firstName, lastName, dob FROM Accounts WHERE email = ?';
-            ts(`[DBHelper.getUserByEmail] getting user ${email}`);
+            if (_.isUndefined(k) || _.isUndefined(v)) {
+                logError('DBHelper.getUserByKey', 'Key and value must be defined', undefined);
+                reject(ERRORS.USER_INFO_ERR);
+                return;
+            }
+
+            if (!Array.isArray(cols) || _.isEmpty(cols) || _.isUndefined(cols)) {
+                logError('DBHelper.getUserByKey', 'Columns must be an array of columns to return', undefined);
+                reject(ERRORS.USER_INFO_ERR);
+                return;
+            }
+
+            const sql = 'SELECT ' + cols.join(", ") + ` FROM Accounts WHERE ${k} = ?`;
+
+            ts(`[DBHelper.getUserByKey] getting user ${v}`);
             
             this._pool.getConnection( (err, connection) => {
                 if (err) {
-                    logError('DBHelper.getUserByEmail this._pool.getConnection', 'Error getting connection from pool', err);
+                    logError('DBHelper.getUserByKey this._pool.getConnection', 'Error getting connection from pool', err);
                     reject(ERRORS.DB_CONN_ERR);
                     return;
                 }
 
                 // Query for the user.
-                connection.query(sql, email, (err, result) => {
+                connection.query(sql, v, (err, result) => {
                     // Release connection.
                     connection.release();
 
                     if (err) {
-                        logError('DBHelper.getUserByEmail connection.query', 'Error retrieving user information', err);
+                        logError('DBHelper.getUserByKey connection.query', 'Error retrieving user information', err);
                         reject(ERRORS.USER_INFO_ERR);
                         return;
                     }
 
                     if (_.isEmpty(result)) {
+                        logError('DBHelper.getUserByKey connection.query', 'No user exists for this email', undefined);
                         reject(ERRORS.NO_USER_FOUND);
                         return;
                     }
@@ -134,6 +150,17 @@ class DBHelper {
                 });
             });
         });
+    }
+
+    /**
+     * Method to log a user in.
+     * @param email {String} - The user's email
+     * @param token {String} - The user's authentication token
+     * 
+     * @return Returns a promise that resolves with the user's email and authentication token.
+     */
+    setUserToken(email) {
+
     }
 }
 

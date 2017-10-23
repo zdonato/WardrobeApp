@@ -23,8 +23,14 @@ module.exports = {
         error: 'Error creating user',
         code: 500
     },
-    UNDEFINED_VAL_USER: {
-        error: 'Email and password must be defined',
-        code: 400
+    UNDEFINED_VAL_USER: (val) => {
+        return {
+            error: `${val} must be defined`,
+            code: 400
+        };
+    },
+    INVALID_CREDS: {
+        error: 'Invalid credentials',
+        code: 401
     }
-}
+};

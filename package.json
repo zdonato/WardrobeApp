@@ -23,10 +23,13 @@
     "cookie-parser": "^1.4.3",
     "crypto": "^1.0.1",
     "express": "^4.15.5",
+    "express-session": "^1.15.6",
     "helmet": "^3.8.2",
     "jquery": "^3.2.1",
     "lodash": "^4.17.4",
     "mysql": "^2.14.1",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
     "timestamp-util": "^1.0.3"
   }
 }
