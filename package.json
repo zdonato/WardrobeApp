@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/zdonato/WardrobeApp#readme",
   "dependencies": {
+    "aws-sdk": "^2.141.0",
     "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
     "cookie-parser": "^1.4.3",

@@ -21,6 +21,7 @@ let express = require('express'),
 /* Route imports */
 let index = require('./server/routes/index');
 let login = require('./server/routes/login');
+let profile = require('./server/routes/profile');
 
 const app = express();
 const helper = new DBHelper();
@@ -79,6 +80,7 @@ passport.use(new LocalStrategy({
 app.use('/', index);
 app.use('/public', express.static(path.join(__dirname, 'public/')));
 app.use('/login', login);
+app.use('/profile', profile);
 
 /* Redirect 404's to homepage */
 app.use((req, res, next) => {

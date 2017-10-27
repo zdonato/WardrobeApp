@@ -9,7 +9,7 @@ let mysql = require('mysql'),
     crypto = require('crypto'),
     bcrypt = require('bcrypt'),
     _ = require('lodash'),
-    config = require('./config');
+    config = require('./configs/SQLconfig.js');
 
 
 const SALT_ROUNDS = 10;
