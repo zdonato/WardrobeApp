@@ -45,7 +45,7 @@ class DBHelper {
             // Check for undefined required vars.
             if (_.isUndefined(email) || _.isUndefined(password)) {
                 logError('DBHelper.createUser', 'Email and password must be defined', undefined);
-                reject(ERRORS.UNDEFINED_VAL_USER('Email and password'));
+                reject(ERRORS.UNDEFINED_VAL('Email and password'));
                 return;
             }
 
@@ -275,6 +275,10 @@ function generateUpdateStmt(fields) {
     let sql = `UPDATE ${ACCOUNTS_TABLE} SET `;
 
     fields.forEach((field, idx) => {
+        if (field === 'userId' || field === 'password') {
+            return;
+        }
+
         sql += `\`${field}\`=? `;
 
         if (idx != fields.length - 1) {

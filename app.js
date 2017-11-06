@@ -14,6 +14,7 @@ let express = require('express'),
     session = require('express-session'),
     LocalStrategy = require('passport-local').Strategy,
     DBHelper = require('./server/utilities/DBHelper'),
+    AWSHelper = require('./server/utilities/AWSHelper'),
     bcrypt = require('bcrypt'),
     errors = require('./server/utilities/errors'),
     PORT = 9001;
@@ -25,6 +26,7 @@ let profile = require('./server/routes/profile');
 
 const app = express();
 const helper = new DBHelper();
+const awsHelper = new AWSHelper();
 
 /* App configuration */
 app.set('port', PORT);
