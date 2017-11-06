@@ -15,6 +15,7 @@ let mysql = require('mysql'),
 const SALT_ROUNDS = 10;
 const CONNECTION_LIMIT = 100;
 const ERRORS = require('./errors');
+const ACCOUNTS_TABLE = 'Accounts';
 
 /**
  * DBHelper class.
@@ -66,7 +67,7 @@ class DBHelper {
                     })
                     .catch( (err) => {
                         // No user exists, create the new account.
-                        let sql = 'INSERT INTO `Accounts` (`firstName`, `lastName`, `email`, `password`, `dob`) VALUES (?, ?, ?, ?, ?)';
+                        let sql = `INSERT INTO ${ACCOUNTS_TABLE} ('firstName', 'lastName', 'email', 'password', 'dob') VALUES (?, ?, ?, ?, ?)`;
 
                         bcrypt.hash(password, SALT_ROUNDS, (err, hash) => {
                             if (err) {
@@ -118,7 +119,7 @@ class DBHelper {
                 return;
             }
 
-            const sql = 'SELECT ' + cols.join(", ") + ` FROM Accounts WHERE ${k} = ?`;
+            const sql = 'SELECT ' + cols.join(", ") + ` FROM ${ACCOUNTS_TABLE} WHERE ${k} = ?`;
 
             ts(`[DBHelper.getUserByKey] getting user ${v}`);
             
@@ -153,21 +154,137 @@ class DBHelper {
     }
 
     /**
-     * Method to log a user in.
-     * @param email {String} - The user's email
-     * @param token {String} - The user's authentication token
+     * Method to change a user's password.
      * 
-     * @return Returns a promise that resolves with the user's email and authentication token.
+     * @param email {String} - The email of the user
+     * @param oldPassword {String} - The user's old password
+     * @param newPassword {String} - The user's new password
+     * 
+     * @return Returns a promise that resolves with a success or error message.
      */
-    setUserToken(email) {
+    changePassword(email, oldPassword, newPassword) {
+        return new Promise( (resolve, reject) => {
+            if (_.isUndefined(email) || _.isUndefined(oldPassword) || _.isUndefined(newPassword)) {
+                logError('DBHelper.changePassword', 'Email, old password, and new password must be provided', undefined);
+                reject(ERRORS.BAD_REQUEST_ACTION('change password'));
+                return;
+            }
 
+            // Retrieve the user to compare the old password before changing.
+            this.getUserByKey('email', email, ['email', 'password'])
+                .then( (user) => {
+                    bcrypt.compare(oldPassword, user.password, (err, res) => {
+                        if (err || !res) {
+                            logError('DBHelper.changePassword bcrypt.compare', 'Error comparing passwords', undefined);
+                            reject(ERRORS.INVALID_CREDS);
+                            return;
+                        }
+
+                        // User is validated, change the password now.
+                        this._pool.getConnection( (err, connection) => {
+                            if (err) {
+                                logError('DBHelper.changePassword this._pool.getConnection', 'Error getting connection from pool', err);
+                                reject(ERRORS.DB_CONN_ERR);
+                                return;
+                            }
+
+                            bcrypt.hash(newPassword, SALT_ROUNDS, (err, hash) => {
+                                if (err || !res) {
+                                    logError('DBHelper.changePassword bcrypt.hash', 'Error hashing passwords', undefined);
+                                    reject(ERRORS.GENERIC_SERVER);
+                                    return;
+                                }
+
+                                let sql = `UPDATE ${ACCOUNTS_TABLE} SET \`password\`=? WHERE \`email\`=?`;
+                                
+                                connection.query(sql, [hash, email], (err, result) => {
+                                    if (err) {
+                                        logError('DBHelper.changePassword connection.query', 'Error changing user password', err);
+                                        reject(ERRORS.DB_CONN_ERR);
+                                        return;
+                                    }
+    
+                                    resolve({
+                                        message: 'Successfully changed user password'
+                                    });
+                                });
+                            })
+                        })
+                    })
+                })
+                .catch( (err) => {
+                    reject(err);
+                    return;
+                })
+        });
     }
+
+    /**
+     * Method to update the fields on a user.
+     * 
+     * @param email {String} - The email of the user.
+     * @param fields {Array.string} - The fields to update
+     * @param values {Array.Any} - The values to update the fields to
+     * 
+     * @return Returns a promise that resolves or rejects with success or error
+     */
+    updateUserFields(email, fields, values) {
+        return new Promise( (resolve, reject) => {
+            if (_.isUndefined(email) || _.isEmpty(fields) || _.isEmpty(values)) {
+                logError('DBHelper.updateUserFields', 'Email, fields, and values must be provided', undefined);
+                reject(ERRORS.BAD_REQUEST_ACTION('update user fields'));
+                return;
+            }
+
+            this._pool.getConnection( (err, connection) => {
+                if (err) {
+                    logError('DBHelper.updateUserFields this._pool.getConnection', 'Error getting connection from pool', err);
+                    reject(ERRORS.DB_CONN_ERR);
+                    return;
+                }
+
+                let sql = generateUpdateStmt(fields, values);
+
+                values.push(email);
+
+                connection.query(sql, values, (err, result) => {
+                    if (err) {
+                        logError('DBHelper.updateUserFields connection.query', 'Error updating user fields', err);
+                        reject(ERRORS.DB_CONN_ERR);
+                        return;
+                    }
+
+                    resolve({
+                        message: 'Successfully updated user fields'
+                    });
+                });
+            })
+        });
+    }
+
+
 }
 
 function logError(fnName, msg, error) {
     ts(`ERROR: [${fnName}] ${msg}`);
 
     if (error) console.log(error);
+}
+
+function generateUpdateStmt(fields) {
+    let sql = `UPDATE ${ACCOUNTS_TABLE} SET `;
+
+    fields.forEach((field, idx) => {
+        sql += `\`${field}\`=? `;
+
+        if (idx != fields.length - 1) {
+            sql += ', ';
+        }
+    });
+
+    sql += 'WHERE \`email\`=?';
+
+    return sql;
 }
 
 module.exports = DBHelper;

@@ -32,5 +32,15 @@ module.exports = {
     INVALID_CREDS: {
         error: 'Invalid credentials',
         code: 401
+    },
+    BAD_REQUEST_ACTION: (action) => {
+        return {
+            error: `The request to ${action} does not contain all of the information it needs`,
+            code: 400
+        }
+    },
+    GENERIC_SERVER: {
+        error: 'There was an error processing this request',
+        code: 500
     }
 };
