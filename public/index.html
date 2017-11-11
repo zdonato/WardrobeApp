@@ -5,4 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <meta charset="utf-8">
     </head>
+    <body>
+        <form action="/clothing/add" method="POST" enctype="multipart/form-data">
+            <input type="file" name="fileToUpload" id="fileToUpload">
+            <input type="text" name="blah" id="foo" value="bar">
+            <input type="text" name="UserId" id="UserId" value="2">
+            <input type="submit" value="Upload Image" name="submit">
+        </form>
+    </body>
 </html>

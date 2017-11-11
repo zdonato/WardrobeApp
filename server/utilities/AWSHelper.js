@@ -70,7 +70,7 @@ class AWSHelper {
                             return;
                         }
         
-                        resolve(params.Item);
+                        resolve(clothingObj);
                     });
                 })
                 .catch( (err) => {
@@ -89,7 +89,7 @@ class AWSHelper {
         return new Promise( (resolve, reject) => {
             // Check for undefined.
             if (_.isUndefined(userId)) {
-                logError('AWSHelper.getAllUserItems', 'UserId must be provided');
+                logError('AWSHelper.getWardrobe', 'UserId must be provided');
                 reject(ERRORS.UNDEFINED_VAL('UserId'));
                 return;
             }
@@ -103,7 +103,7 @@ class AWSHelper {
 
             this._documentClient.get(params, (err, data) => {
                 if (err) {
-                    logError('AWSHelper.getAllUserItems this._documentClient.get', 'Error retrieving users items', err);
+                    logError('AWSHelper.getWardrobe this._documentClient.get', 'Error retrieving users items', err);
                     reject(ERRORS.GET_CLOTHING_ITEMS);
                     return;
                 }

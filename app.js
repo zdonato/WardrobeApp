@@ -23,6 +23,7 @@ let express = require('express'),
 let index = require('./server/routes/index');
 let login = require('./server/routes/login');
 let profile = require('./server/routes/profile');
+let clothing = require('./server/routes/clothing');
 
 const app = express();
 const helper = new DBHelper();
@@ -83,6 +84,7 @@ app.use('/', index);
 app.use('/public', express.static(path.join(__dirname, 'public/')));
 app.use('/login', login);
 app.use('/profile', profile);
+app.use('/clothing', clothing);
 
 /* Redirect 404's to homepage */
 app.use((req, res, next) => {
