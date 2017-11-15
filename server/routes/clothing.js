@@ -82,7 +82,7 @@ router.post('/add', authenticate, (req, res) => {
             })
             .catch( (err) => {
                 console.log(err);
-                res.status(err.code).send(err.error);
+                res.status(err.code).send({ error: err.error});
             });
     });
 });
@@ -103,7 +103,7 @@ router.get('/:userid', (req, res) => {
             res.send(data);
         })
         .catch( (err) => {
-            res.send(err);
+            res.status(err.code).send({error: err.error});
         })
 });
 

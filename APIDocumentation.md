@@ -1,0 +1,57 @@
+# REST API Documentation
+
+All requests will send errors with an appropriate HTTP error code and a json object of the form unless otherwise specified: 
+```
+{
+    error: "Some error message"
+}
+```
+_____
+
+## Homepage (Website)
+
+Route | Method(s)
+:---: | ---
+*/* | GET
+#### Return
+Returns ```index.html```, the root of the site.
+
+
+____
+
+## Login
+
+Route | Method(s)
+:---: | ---
+*/login* | POST
+#### Body
+```
+{
+    "username": "email@domain.com",
+    "password": "password"
+}
+```
+
+#### Return
+On success redirects to */*
+
+On error returns a Unauthorized 401 Code
+
+___
+
+## User Profile
+
+Route | Method(s)
+:---: | ---
+*/profile/:userid* | GET
+
+#### Return
+```
+{
+    userId: Number
+    firstName: String
+    lastName: String
+    email: String
+    dob: String
+}
+```
