@@ -41,11 +41,16 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 passport.serializeUser((user, done) => {
+    let userobj = {
+        email: user.email,
+        userId: user.userId
+    };
+
     done(null, user.email);
 });
 
 passport.deserializeUser( (email, done) => {
-    helper.getUserByKey('email', email, ['email'])
+    helper.getUserByKey('email', email, ['email', 'userId'])
         .then( (result) => {
             done(null, result);
         })

@@ -33,7 +33,7 @@ s3.putObject = (opts, cb) => {
  * Handles uploading files.
  * Must set the encoding to be multipart/form-data
 */
-router.post('/add', (req, res) => {
+router.post('/add', authenticate, (req, res) => {
     
     let form = new formidable.IncomingForm();
 
