@@ -1,5 +1,6 @@
 # REST API Documentation
 
+## Errors
 All requests will send errors with an appropriate HTTP error code and a json object of the form unless otherwise specified: 
 ```
 {
