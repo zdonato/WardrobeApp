@@ -56,3 +56,32 @@ Route | Method(s)
     dob: String
 }
 ```
+
+_____
+
+## User Registration
+Route | Method(s)
+:---: | ---
+*/register* | POST
+
+#### Body
+```
+{
+    firstName: String,
+    lastName: String,
+    email: String,
+    password: String,
+    dob: String
+}
+```
+
+#### Return
+```
+{
+    userId: Number
+    firstName: String,
+    lastName: String,
+    email: String,
+    dob: String
+}
+```

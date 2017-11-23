@@ -67,7 +67,7 @@ class DBHelper {
                     })
                     .catch( (err) => {
                         // No user exists, create the new account.
-                        let sql = `INSERT INTO ${ACCOUNTS_TABLE} ('firstName', 'lastName', 'email', 'password', 'dob') VALUES (?, ?, ?, ?, ?)`;
+                        let sql = `INSERT INTO ${ACCOUNTS_TABLE} (\`firstName\`, \`lastName\`, \`email\`, \`password\`, \`dob\`) VALUES (?, ?, ?, ?, ?)`;
 
                         bcrypt.hash(password, SALT_ROUNDS, (err, hash) => {
                             if (err) {

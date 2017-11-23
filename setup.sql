@@ -6,7 +6,7 @@ CREATE TABLE Accounts (
     firstName varchar(32),
     lastName varchar(32),
     email varchar(64),
-    password varchar(32),
+    password varchar(64),
     dob varchar(32),
     PRIMARY KEY (userId)
 );
