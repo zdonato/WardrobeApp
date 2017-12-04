@@ -6,7 +6,11 @@ router.post('/',
     passport.authenticate('local'), 
     (req, res) => {
         // User is authenticated.
-        res.redirect('/');
+        if (req.body.NO_REDIRECT) {
+            res.send("Authenticated");
+        } else {
+            res.redirect('/');
+        }
     }
 );
 

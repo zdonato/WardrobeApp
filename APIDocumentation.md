@@ -29,7 +29,8 @@ Route | Method(s)
 ```
 {
     "username": "email@domain.com",
-    "password": "password"
+    "password": "password",
+    "NO_REDIRECT": true if you only want a text response on whether the user is authenticated or not
 }
 ```
 
