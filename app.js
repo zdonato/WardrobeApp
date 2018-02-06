@@ -25,6 +25,7 @@ let login = require('./server/routes/login');
 let profile = require('./server/routes/profile');
 let clothing = require('./server/routes/clothing');
 let register = require('./server/routes/register');
+let password = require('./server/routes/password');
 
 const app = express();
 const helper = new DBHelper();
@@ -92,6 +93,7 @@ app.use('/login', login);
 app.use('/profile', profile);
 app.use('/clothing', clothing);
 app.use('/register', register);
+app.use('/password', password);
 
 /* Redirect 404's to homepage */
 app.use((req, res, next) => {

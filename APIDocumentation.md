@@ -86,3 +86,25 @@ Route | Method(s)
     dob: String
 }
 ```
+
+## Reset Password
+Route | Method(s)
+:---: | ---
+*/password/reset* | POST
+
+#### Body
+```
+{
+    oldPassword: String,
+    newPassword: String,
+    email: String
+    code: String
+}
+```
+
+#### Return
+```
+{
+    success: Boolean
+}
+```

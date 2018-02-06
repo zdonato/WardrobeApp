@@ -195,15 +195,19 @@ class DBHelper {
                                     return;
                                 }
 
-                                let sql = `UPDATE ${ACCOUNTS_TABLE} SET \`password\`=? WHERE \`email\`=?`;
+                                let sql = `UPDATE ${ACCOUNTS_TABLE} SET \`password\`=?, reset_code = NULL WHERE \`email\`=?`;
                                 
+                                ts(`[DBHelper.changePassword] Attempting to change password for user ${email}`);
+
                                 connection.query(sql, [hash, email], (err, result) => {
                                     if (err) {
                                         logError('DBHelper.changePassword connection.query', 'Error changing user password', err);
                                         reject(ERRORS.DB_CONN_ERR);
                                         return;
                                     }
-    
+                                    
+                                    ts(`[DBHelper.changePassword] Successfully changed password for user ${email}`);
+
                                     resolve({
                                         message: 'Successfully changed user password'
                                     });
@@ -262,7 +266,20 @@ class DBHelper {
         });
     }
 
+    /**
+     * Method to retrieve the password reset code from the user.
+     * 
+     * @param email {String} - The email of the user.
+     * 
+     * @return Returns a promise that resolves with the user id, email, and reset code of the user.
+     */
+    getResetPassCode(email) {
+        return this.getUserByKey('email', email, ['reset_code']);
+    }
 
+    /**
+     * Method to change
+     */
 }
 
 function logError(fnName, msg, error) {
