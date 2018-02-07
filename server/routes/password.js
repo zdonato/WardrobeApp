@@ -49,4 +49,29 @@ router.post('/reset', (req, res) => {
         });
 });
 
+/**
+ * @route("/password/forgot")
+ * @method("POST")
+ * 
+ * @return Returns an error or success message.
+ */
+router.post('/forgot', (req, res) => {
+
+    // Request must have an email address.
+    if (_.isUndefined(req.body) || _.isUndefined(req.body.email)) {
+        let err = errors.BAD_REQUEST_ACTION('start a password reset');
+        res.status(err.code).send({ error: err.error });
+        return;
+    }
+
+    // Start the password reset process.
+    helper.generatePasswordReset(req.body.email)
+        .then( (result) => {
+            res.send(result);
+        })
+        .catch( (err) => {
+            res.status(err.code || 500).send(err);
+        });
+});
+
 module.exports = router;

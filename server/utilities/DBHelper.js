@@ -2,6 +2,8 @@
  * Database helper class to interact with the sql database.
  * @author Zachary Donato
  * 9/27/17
+ * 
+ * All errors will be returned with user friendly error messages to send.
  */
 let mysql = require('mysql'),
     ts = require('timestamp-util'),
@@ -9,13 +11,25 @@ let mysql = require('mysql'),
     crypto = require('crypto'),
     bcrypt = require('bcrypt'),
     _ = require('lodash'),
-    config = require('./configs/SQLconfig.js');
+    config = require('./configs/SQLconfig.js'),
+    nodemailer = require('nodemailer'),
+    emailConfig = require('./configs/emailConfig'),
+    mustache = require('mustache');
 
+let transporter = nodemailer.createTransport(emailConfig);
+
+// Email templates.
+let EMAIL_RESET_PASS = require('../templates/email_reset_password');
 
 const SALT_ROUNDS = 10;
 const CONNECTION_LIMIT = 100;
 const ERRORS = require('./errors');
 const ACCOUNTS_TABLE = 'Accounts';
+const EXPIRE_TIME_PW_HOURS = 24;
+
+const TEMPLATES = {
+    EMAIL_RESET_PASS: EMAIL_RESET_PASS
+};
 
 /**
  * DBHelper class.
@@ -258,6 +272,7 @@ class DBHelper {
                         return;
                     }
 
+                    ts(`Successfully updated [${fields.join(', ')}] for user ${email}`)
                     resolve({
                         message: 'Successfully updated user fields'
                     });
@@ -278,8 +293,73 @@ class DBHelper {
     }
 
     /**
-     * Method to change
+     * Method for starting a password reset.
+     * 
+     * @param email {String} - The email of the user.
+     * 
+     * @return Returns a promise that resolves with a success message or error.
      */
+    generatePasswordReset(email) {
+        return new Promise( (resolve, reject) => {
+            // Check to ensure email is provided.
+            if (_.isUndefined(email)) {
+                logError('DBHelper.generatePasswordReset', 
+                    'Email must be provided', undefined);
+                reject(ERRORS.UNDEFINED_VAL('email'));
+                return;
+            }
+
+            ts(`Generating password reset code for ${email}`)
+
+            // Generate reset code.
+            crypto.randomBytes(32, (err, buf) => {
+                if (err) {
+                    logError('DBHelper.generatePasswordReset crypto.randomBytes',
+                                undefined, err);
+                    reject(ERRORS.GENERIC_SERVER);
+                    return;
+                }
+
+                let code = buf.toString('hex');
+
+                // Create expire time and add to the DB. 
+                let expiresAt = moment().add(EXPIRE_TIME_PW_HOURS, 'hours').format();
+
+                this.updateUserFields(email, ['reset_code', 'expires_at'], [code, expiresAt])
+                    .then( (result) => {
+                        // Send an email to the provided address with a link to reset the password.
+                        let data = {
+                            link: 'http://localhost:9001/reset-password',
+                            code: code,
+                            email: email
+                        };
+
+                        let opts = generateMailOpts('Wardrobe App - Reset Password', email,
+                                                    'EMAIL_RESET_PASS', data);
+
+                        transporter.sendMail(opts, (err, info) => {
+                            if (err) {
+                                logError('DBHelper.generatePasswordReset transporter.sendMail',
+                                         undefined, err);
+                                reject(ERRORS.GENERIC_SERVER);
+                                return;
+                            }
+
+                            ts(`Successfully generated password reset for ${email}`);
+                            resolve({
+                                message: "success"
+                            });
+                        });
+                    })
+                    .catch( (err) => {
+                        logError('DBHelper.generatePasswordReset updateUserFields', undefined, err);
+                        reject(err);
+                        return;
+                    });
+            });
+        });
+        
+    }
 }
 
 function logError(fnName, msg, error) {
@@ -306,6 +386,27 @@ function generateUpdateStmt(fields) {
     sql += 'WHERE \`email\`=?';
 
     return sql;
+}
+
+/**
+ * 
+ * @param subject {String} - The subject of the email
+ * @param to {String} - The address to send the email to
+ * @param template {String} - The template to use for the email
+ * @param data {Object} - An object of values to apply in the template
+ */
+function generateMailOpts(subject, to, template, data) {
+    let opts = {
+        from: 'Wardrobe App <noreplywardrobeapp@gmail.com',
+        to: to,
+        subject: subject
+    };
+
+    // Look for template.
+    if (!TEMPLATES[template]) { return "Must provide template to use."; }
+
+    opts.text = mustache.render(TEMPLATES[template], data);
+    return opts;
 }
 
 module.exports = DBHelper;

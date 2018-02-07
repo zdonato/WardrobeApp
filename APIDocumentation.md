@@ -108,3 +108,25 @@ Route | Method(s)
     success: Boolean
 }
 ```
+
+## Forgot Password
+Route | Method(s)
+:---: | ---
+*/password/forgot* | POST
+
+This route will generate a reset code for the user and send an email to the address provided with a link to reset their password. The link will have reset_code and email in the query params for the front end to use.
+
+#### Body
+```
+{
+    email: String
+}
+```
+
+#### Return
+Message will be success if completed successfully.
+```
+{
+    message: String
+}
+```

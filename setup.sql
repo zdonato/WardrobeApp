@@ -8,6 +8,8 @@ CREATE TABLE Accounts (
     email varchar(64),
     password varchar(64),
     dob varchar(32),
+    reset_code varchar(64) DEFAULT NULL,
+    expires_at varchar(32),
     PRIMARY KEY (userId)
 );
 
