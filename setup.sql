@@ -1,7 +1,7 @@
-CREATE DATABASE WardrobeApp;
+CREATE DATABASE IF NOT EXISTS WardrobeApp;
 USE WardrobeApp;
 
-CREATE TABLE Accounts (
+CREATE TABLE IF NOT EXISTS Accounts (
     userId int NOT NULL AUTO_INCREMENT,
     firstName varchar(32),
     lastName varchar(32),
