@@ -86,6 +86,7 @@ Route | Method(s)
     dob: String
 }
 ```
+_____
 
 ## Reset Password
 Route | Method(s)
@@ -108,6 +109,8 @@ Route | Method(s)
     success: Boolean
 }
 ```
+
+_____
 
 ## Forgot Password
 Route | Method(s)
