@@ -18,6 +18,8 @@ let express = require('express'),
     bcrypt = require('bcrypt'),
     errors = require('./server/utilities/errors'),
     PORT = 9001;
+    
+let cors = require('cors');
 
 /* Route imports */
 let index = require('./server/routes/index');
@@ -30,6 +32,8 @@ let password = require('./server/routes/password');
 const app = express();
 const helper = new DBHelper();
 const awsHelper = new AWSHelper();
+
+app.use(cors());
 
 /* App configuration */
 app.set('port', PORT);
@@ -94,6 +98,9 @@ app.use('/profile', profile);
 app.use('/clothing', clothing);
 app.use('/register', register);
 app.use('/password', password);
+
+let api = require('./api');
+app.use('/api', api);
 
 /* Redirect 404's to homepage */
 app.use((req, res, next) => {

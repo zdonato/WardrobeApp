@@ -35,10 +35,11 @@ class AWSHelper {
      * Method to add a new item to the table.
      * @param userID {String} - The id of the user
      * @param clothingObj {Object} - An object that identifies the piece of clothing via its properties
+     * @param newUser {Boolean} - Indicates whether we are creating a new user or not, used to add an empty clothing object
      * 
      * @return Returns a promise that resolves with the created item or rejects with an error
      */
-    addItem(userId, clothingObj) {
+    addItem(userId, clothingObj, newUser) {
         return new Promise((resolve, reject) => {
             // Check for undefined.
             if (_.isUndefined(userId) || _.isUndefined(clothingObj)) {
@@ -52,14 +53,34 @@ class AWSHelper {
             // Grab the user's existing info to update.
             this.getWardrobe(userId)
                 .then( (data) => {
-                    // Add a unique id to the clothing object.
-                    clothingObj.ID = uuid();
+                    if (newUser) {
+                        data.ClothingObj = clothingObj;
+                    } else {
+                        // Merge the incoming clothing object with the object in the data base.
+                        Object.keys(clothingObj).forEach( (prop) => {
+                            // Accessories is a dictionary, so loop over the properties.
+                            if (prop === "Accessories") {
+                                Object.keys(clothingObj[prop]).forEach( (accessory) => {
+                                    if (data.ClothingObj[prop][accessory]) {
+                                        data.ClothingObj[prop][accessory] = clothingObj[prop][accessory];
+                                    }
+                                }); 
+
+                                return;
+                            }
+
+                            if (clothingObj.hasOwnProperty(prop) && data.ClothingObj[prop]) {
+                                data.ClothingObj[prop].push(clothingObj[prop]);
+                            }
+                        });
+                    }
                     
+
                     let params = {
                         TableName: TABLE_NAME,
                         Item: {
                             User_Id: userId,
-                            Wardrobe: data && data.Wardrobe ? data.Wardrobe.concat([clothingObj]) : [clothingObj]
+                            ClothingObj: data.ClothingObj
                         }
                     };
         
@@ -74,6 +95,7 @@ class AWSHelper {
                     });
                 })
                 .catch( (err) => {
+                    console.log(err);
                     reject(err);
                 })
         });

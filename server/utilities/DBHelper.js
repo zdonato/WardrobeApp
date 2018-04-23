@@ -14,7 +14,10 @@ let mysql = require('mysql'),
     config = require('./configs/SQLconfig.js'),
     nodemailer = require('nodemailer'),
     emailConfig = require('./configs/emailConfig'),
-    mustache = require('mustache');
+    mustache = require('mustache'),
+    AWS_HELPER = require('../utilities/AWSHelper');
+
+let awsHelper = new AWS_HELPER();
 
 let transporter = nodemailer.createTransport(emailConfig);
 
@@ -29,6 +32,23 @@ const EXPIRE_TIME_PW_HOURS = 24;
 
 const TEMPLATES = {
     EMAIL_RESET_PASS: EMAIL_RESET_PASS
+};
+
+let DEFAULT_CLOTHING_OBJ = {
+    Accessories: {
+        Bag: [],
+        Belt: [],
+        Collar: [],
+        Neck: [],
+        Other: [],
+        Piercings: [],
+        Wrist: []
+    },
+    Bottoms: [],
+    Footwear: [],
+    Hat: [],
+    OverTops: [],
+    Tops: []
 };
 
 /**
@@ -102,7 +122,14 @@ class DBHelper {
 
                                 // User created successfully. Return the user object.
                                 this.getUserByKey('email', email, ['userId', 'email', 'firstName', 'lastName', 'dob'])
-                                    .then( (result) => { resolve(result); })
+                                    .then( (result) => { 
+                                        // Add the empty clothing object to the user.
+                                        awsHelper.addItem(result.userId, DEFAULT_CLOTHING_OBJ, true)
+                                            .then( (addResult) => {
+                                                resolve(result);
+                                            })
+                                            .catch( (err) => { reject(err); });
+                                    })
                                     .catch( (err) => { reject(err); });
                             });
                         });

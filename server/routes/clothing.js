@@ -62,23 +62,27 @@ router.post('/add', authenticate, (req, res) => {
         // Add the item to the dynamodb.
         awsHelper.addItem(userId, clothingObj)
             .then( (item) => {
-                console.log(item);
-                // Item saved successfully. Save the image to AWS Bucket.
-                let AWS_OPTS = {
-                    Bucket: AWS_BUCKET,
-                    ServerSideEncryption: 'AES256',
-                    Key: item.ID,
-                    ContentType: files.fileToUpload.type
-                };
+                if (files.fileToUpload) {
+                    // Item saved successfully. Save the image to AWS Bucket.
+                    let AWS_OPTS = {
+                        Bucket: AWS_BUCKET,
+                        ServerSideEncryption: 'AES256',
+                        Key: item.ID,
+                        ContentType: files.fileToUpload.type
+                    };
 
-                fs.createReadStream(files.fileToUpload.path)
-                    .pipe(s3.putObject(AWS_OPTS, (err, data) => {
-                        if (err) {
-                            console.log(err);
-                        }
+                    fs.createReadStream(files.fileToUpload.path)
+                        .pipe(s3.putObject(AWS_OPTS, (err, data) => {
+                            if (err) {
+                                console.log(err);
+                            }
 
-                        res.send('Success');
-                    }));
+                            res.send('Success');
+                        }));
+                } else {
+                    res.send('Success');
+                }
+                
             })
             .catch( (err) => {
                 console.log(err);
