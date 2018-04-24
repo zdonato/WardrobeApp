@@ -7,7 +7,9 @@ let express = require('express'),
     pipefy = require('pipefy'),
     s3 = new aws.S3(),
     AWS_HELPER = require('../utilities/AWSHelper'),
-    errors = require('../utilities/errors');
+    errors = require('../utilities/errors'),
+    spawn = require('child_process').spawn,
+    ts = require('timestamp-util');
 
 const AWS_BUCKET = 'pocket-closet-clothing-images';
 let awsHelper = new AWS_HELPER();
@@ -91,6 +93,33 @@ router.post('/add', authenticate, (req, res) => {
     });
 });
 
+/**
+ * @route("/clothing/recommendation/:userId")
+ * Handles getting an outfit recommendation for a user.
+ */
+router.get('/recommendation/:userid', authenticate, (req, res) => {
+    // Security check.
+    if (req.params.userid != req.user.userId) {
+        let error = errors.INVALID_CREDS;
+        res.status(error.code).send(error.error);
+        return;
+    }
+
+    // Run the recommendation algorithm script.
+    let command = 'python3';
+    let args = ['server/utilities/ReccomendationAlgorithm.py'];
+    let proc = spawn(command, args);
+
+    proc.stdout.on('data', (data) => {
+        console.log(data.toString());
+        res.send('Success');
+        return;
+    });
+
+    proc.stderr.on('data', (data) => {
+        console.log(data.toString());
+    });
+});
 
 router.get('/:userid', (req, res) => {
     let userId; 
