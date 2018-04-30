@@ -112,7 +112,12 @@ router.get('/recommendation/:userid', authenticate, (req, res) => {
 
     proc.stdout.on('data', (data) => {
         console.log(data.toString());
-        res.send('Success');
+        let output = data.toString();
+
+        let recJson = JSON.parse(output);
+
+        res.send(recJson);
+
         return;
     });
 

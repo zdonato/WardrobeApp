@@ -12,25 +12,26 @@ try:
 except ImportError:
 	from urllib import urlopen, urlencode
 
+configFilePath = "server/utilities/configs/config.cfg"
+
 try:
 	config = configparser.ConfigParser()
-	config.read('./../configs/config.cfg')
+	config.read(configFilePath)
 except Exception as error:
 	raise("Error reading in the config file with error: {}".format(error))
 
 def getWeatherInformation(location):
 	weather=Weather(unit='f')
 	info = weather.lookup_by_location(location)
-	weatherInfo = {'Condition': info.forecast()[0].text(),
-				   'High': info.forecast()[0].high(),
-				   'Low': info.forecast()[0].low()}
+	forecast = info.forecast[0]
+	weatherInfo = {'Condition': forecast.text,
+				   'High': forecast.high,
+				   'Low': forecast.low}
 	return weatherInfo
 
 def weatherClothingRecommendation(weatherInfo):
 	low = int(weatherInfo['Low'])
 	high = int(weatherInfo['High'])
-	print ('Low: ' + str(low))
-	print ('High: ' + str(high))
 	rtrnList = []
 	if low >= 75:
 		rtrnList.append('Hot')
@@ -66,11 +67,10 @@ def weatherClothingRecommendation(weatherInfo):
 	return rtrnList
 
 def recommendationAlgorithm(location, event, user_id):
-	returnDict = {'Top': '', 'Bottom': '', 'Footwear': '', }
+	returnDict = {"Top": "", "Bottom": "", "Footwear": "" }
 	ddbClient = boto3.client('dynamodb', region_name='us-east-1')
 	weatherInfo = getWeatherInformation(location)
 	weatherRec = weatherClothingRecommendation(weatherInfo)
-	print (weatherRec)
 	weatherItems = ast.literal_eval(config.get('Weather Clothing Types', weatherRec[0]))
 	eventItems = ast.literal_eval(config.get('Event Clothing Types', event))
 	possTops = ast.literal_eval(config.get('Required', 'Top'))
@@ -91,11 +91,11 @@ def recommendationAlgorithm(location, event, user_id):
 	footwears = returnItemsToRecommend(topTypes, clothingObjects['Footwear'], weatherItems, specificWeatherItems)
 
 	if tops:
-		returnDict['Top'] = tops[random.randint(0, len(tops) - 1)]['S3FilePath']
+		returnDict["Top"] = tops[random.randint(0, len(tops) - 1)]['S3FilePath']
 	if bottoms:
-		returnDict['Bottom'] = tops[random.randint(0, len(bottoms) - 1)]['S3FilePath']
+		returnDict["Bottom"] = tops[random.randint(0, len(bottoms) - 1)]['S3FilePath']
 	if footwears:
-		returnDict['Footwear'] = tops[random.randint(0, len(footwears) - 1)]['S3FilePath']
+		returnDict["Footwear"] = tops[random.randint(0, len(footwears) - 1)]['S3FilePath']
 	print (returnDict)
 	return returnDict
 
