@@ -114,9 +114,16 @@ router.get('/recommendation/:userid', authenticate, (req, res) => {
         console.log(data.toString());
         let output = data.toString();
 
-        let recJson = JSON.parse(output);
+        output = output.replace(/'/g, '"');
 
-        res.send(recJson);
+        try {
+            let recJson = JSON.parse(output);
+            res.send(recJson);
+        } catch (e)
+        {
+            let error = errors.GENERIC_SERVER;
+            res.status(error.code).send(error.error);
+        }
 
         return;
     });

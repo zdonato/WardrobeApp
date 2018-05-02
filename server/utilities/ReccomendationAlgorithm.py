@@ -21,7 +21,6 @@ except Exception as error:
 	raise("Error reading in the config file with error: {}".format(error))
 
 def getWeatherInformation(location):
-	print ("hello its me")
 	weather=Weather(unit='f')
 	info = weather.lookup_by_location(location)
 	forecast = info.forecast[0]
