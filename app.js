@@ -99,9 +99,6 @@ app.use('/clothing', clothing);
 app.use('/register', register);
 app.use('/password', password);
 
-let api = require('./api');
-app.use('/api', api);
-
 /* Redirect 404's to homepage */
 app.use((req, res, next) => {
     res.redirect('/');
