@@ -1,7 +1,7 @@
 # REST API Documentation
 
 ## Errors
-All requests will send errors with an appropriate HTTP error code and a json object of the form unless otherwise specified: 
+All requests will send errors with an appropriate HTTP error code and a json object of the form unless otherwise specified:
 ```
 {
     error: "Some error message"
@@ -133,3 +133,11 @@ Message will be success if completed successfully.
     message: String
 }
 ```
+
+_____
+
+## Reccomendation Engine
+Route | Method(s)
+:---: | ---
+*/clothing/recommendation/:userid* | GET
+This route will generate an outfit recommendation for the user given by userid.
